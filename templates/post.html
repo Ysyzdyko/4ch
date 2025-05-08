@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}}</title>
+    <style>
+        /* Основные стили комментариев */
+        .comment {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-left: 4px solid #4a6bdf;
+        }
+    
+        .comment .header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+    
+        .comment .header img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+    
+        .comment .content {
+            margin-left: 52px; /* Выравнивание с учетом аватарки */
+            padding-top: 8px;
+        }
+    
+        /* Стили для ответов */
+        .reply-list {
+            list-style: none;
+            padding-left: 32px;
+            margin-top: 12px;
+            border-left: 2px solid #e1e8ff;
+        }
+    
+        .reply {
+            background: #f8faff;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+    
+        .reply::before {
+            content: "→";
+            position: absolute;
+            left: -18px;
+            top: 14px;
+            color: #8ab4ff;
+            font-size: 16px;
+        }
+    
+        .reply .header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+    
+        .reply .header img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+        }
+    
+        .reply .content {
+            margin-left: 42px;
+            font-size: 0.95em;
+            color: #444;
+        }
+    
+        /* Кнопка Reply */
+        .reply-button {
+            background: none;
+            border: none;
+            color: #4a6bdf;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-top: 8px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+    
+        .reply-button:hover {
+            background: #f0f4ff;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>{{.Title}}</h1>
+</header>
+<main>
+    <!-- Main Post -->
+    <div class="post">
+        <div class="header">
+            <img src="{{.UserAvatar}}" alt="Avatar" width="50" height="50">
+            <div>
+                <b>{{.Author}}</b><br>
+                <small>{{.CreatedAt}}</small><br>
+                <small>ID: {{.ID}}</small>
+            </div>
+        </div>
+        <div class="content">
+            <img src="{{.ImageURL}}" alt="Post Image">
+            <div class="text">
+                <h3>{{.Title}}</h3>
+                <p>{{.Content}}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comments Section -->
+    <div class="comments">
+        <h2>Comments</h2>
+        <ul class="comment-list">
+            {{range .Comments}}
+            <li class="comment" data-comment-id="{{.ID}}">
+                <div class="header">
+                    <img src="{{.AvaterLink}}" alt="Avatar" width="40" height="40">
+                    <div>
+                        <b>{{.Author}}</b><br>
+                        <small>{{.CreatedAt}}</small><br>
+                        <small>ID: {{.ID}}</small>
+                    </div>
+                </div>
+                <div class="content">
+                    <div class="text">
+                        <p>{{.Content}}</p>
+                    </div>
+                    <button class="reply-button" data-comment-id="{{.ID}}">Reply</button>
+                </div>
+
+                <!-- Reply List (Nested) -->
+                {{if .Replies}}
+                <ul class="reply-list">
+                    {{range .Replies}}
+                    <li class="reply">
+                        <div class="header">
+                            <b>{{.Author}}</b><br>
+                            <small>{{.CreatedAt}}</small><br>
+                            <small>ID: {{.ID}}</small>
+                        </div>
+                        <div class="content">
+                            <p>{{.Content}}</p>
+                        </div>
+                    </li>
+                    {{end}}
+                </ul>
+                {{end}}
+            </li>
+            {{end}}
+        </ul>
+    </div>
+
+    <!-- Add a Comment or Reply Section -->
+    <div class="add-comment">
+        <h3>Add a Comment</h3>
+        <form action="/post/submit-comment?id={{.ID}}" method="POST">
+            <input type="hidden" name="parent_comment_id" value="">
+            <textarea name="content" placeholder="Write your comment here..." rows="4" cols="50" required></textarea><br><br>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+</main>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll(".reply-button").forEach(button => {
+            button.addEventListener("click", function() {
+                const commentID = this.getAttribute("data-comment-id");
+                document.querySelector("input[name='parent_comment_id']").value = commentID;
+                document.querySelector("textarea[name='content']").focus();
+            });
+        });
+    });
+</script>
+</body>
+</html>
